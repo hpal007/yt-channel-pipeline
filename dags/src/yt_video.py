@@ -1,7 +1,7 @@
 import os
 import json
 
-from src.yt_utils import logger, youtube
+from src.yt_utils import logger, youtube,drop_location
 
 
 def main(video_ids):
@@ -49,14 +49,14 @@ def main(video_ids):
     channel_id = videos_data[0]["channelId"] if videos_data else "unknown"
     json_response = json.dumps(videos_data, indent=2)
 
-    if not os.path.exists("/tmp/video"):
+    if not os.path.exists(f"{drop_location}/video"):
         # Create the directory if it does not exist
-        logger.info("Creating directory /tmp/video")
-        os.mkdir("/tmp/video")
+        logger.info(f"Creating directory {drop_location}")
+        os.mkdir(f"{drop_location}/video")
 
     # Write the response to a file
-    open(f"/tmp/video/{channel_id}.json", "w").write(str(json_response))
-    logger.info(f"Response written to /tmp/video/{channel_id}.json")
+    open(f"{drop_location}/video/{channel_id}.json", "w").write(str(json_response))
+    logger.info(f"Response written to {drop_location}/{channel_id}.json")
 
 
 if __name__ == "__main__":

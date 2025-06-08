@@ -24,6 +24,7 @@ youtube = googleapiclient.discovery.build(
     api_service_name, api_version, developerKey=YOUTUBE_API_KEY
 )
 
+drop_location = '/opt/airflow/local_data'
 
 # Function to get channel information
 #  Process YouTube comments

@@ -1,7 +1,7 @@
 import os
 import json
 
-from src.yt_utils import logger, process_comments, youtube
+from src.yt_utils import logger, process_comments, youtube, drop_location
 
 
 def main(video_ids):
@@ -33,14 +33,14 @@ def get_comments_per_video(video_id):
 
     logger.info(f"Total comments fetched: {len(comments_list)}")
 
-    if not os.path.exists("/tmp/comments"):
+    if not os.path.exists(f"{drop_location}/comments"):
         # Create the directory if it does not exist
-        logger.info("Creating directory /tmp/comments")
-        os.mkdir("/tmp/comments")
+        logger.info(f"Creating directory {drop_location}/comments")
+        os.mkdir(f"{drop_location}/comments")
 
     json_response = json.dumps(comments_list, indent=2)
-    open(f"/tmp/comments/{video_id}.json", "w").write(str(json_response))
-    print(f"Response written to /tmp/comments/{video_id}.json")
+    open(f"{drop_location}/comments/{video_id}.json", "w").write(str(json_response))
+    print(f"Response written to {drop_location}/{video_id}.json")
 
 
 if __name__ == "__main__":
