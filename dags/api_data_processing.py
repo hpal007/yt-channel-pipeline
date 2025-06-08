@@ -3,7 +3,6 @@ from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
 from airflow.sdk.bases.sensor import PokeReturnValue
 from airflow.providers.postgres.hooks.postgres import PostgresHook
 
-
 @dag
 def api_data_processing():
 
@@ -25,18 +24,7 @@ def api_data_processing():
 
     @task.sensor(poke_interval=30, timeout=300)
     def is_api_available() -> PokeReturnValue:
-        import os
-        import googleapiclient.discovery
-
-        os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
-
-        api_service_name = "youtube"
-        api_version = "v3"
-        DEVELOPER_KEY = "AIzaSyBDN8cmueTUdzjJmiOCnkz0JVuvPBo7CFU"
-
-        youtube = googleapiclient.discovery.build(
-            api_service_name, api_version, developerKey=DEVELOPER_KEY
-        )
+        from src.yt_utils import youtube
 
         request = youtube.commentThreads().list(
             part="snippet",
