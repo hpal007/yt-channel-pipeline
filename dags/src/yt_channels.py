@@ -18,7 +18,9 @@ def main(channel_id):
             {
                 "channelId": item["id"],
                 "title": item["snippet"].get("title"),
+                "channelTitle": item["snippet"].get("channelTitle"),
                 "description": item["snippet"].get("description"),
+                "publishedAt": item["snippet"].get("publishedAt"),"
                 "customUrl": item["snippet"].get("customUrl"),
                 "country": item["snippet"].get("country"),
                 "viewCount": item["statistics"].get("viewCount"),

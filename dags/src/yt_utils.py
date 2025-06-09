@@ -42,6 +42,7 @@ def get_channel_name_config():
 def process_comments(response_items):
     comments = []
     for comment in response_items:
+        video_id = comment["snippet"]["videoId"]
         author = comment["snippet"]["topLevelComment"]["snippet"]["authorDisplayName"]
         comment_text = comment["snippet"]["topLevelComment"]["snippet"]["textOriginal"]
         publish_time = comment["snippet"]["topLevelComment"]["snippet"]["publishedAt"]
@@ -49,6 +50,7 @@ def process_comments(response_items):
         replies_count = comment["snippet"].get("totalReplyCount", 0)
 
         comment_info = {
+            "video_id": video_id,
             "author": author,
             "comment": comment_text,
             "published_at": publish_time,
@@ -65,12 +67,14 @@ def process_comments(response_items):
 def process_videos(response_items):
     videos = []
     for video in response_items:
+        channel_id = video["snippet"]["channelId"]
         video_title = video["snippet"]["title"]
         video_description = video["snippet"]["description"]
         video_id = video["contentDetails"]["videoId"]
         video_published_at = video["contentDetails"]["videoPublishedAt"]
 
         video_info = {
+            "channel_id": channel_id,
             "title": video_title,
             "description": video_description,
             "videoId": video_id,
