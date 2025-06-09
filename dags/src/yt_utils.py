@@ -1,6 +1,7 @@
 import logging
 import os
 import googleapiclient.discovery
+import yaml
 
 # Logger configuration
 logging.basicConfig(level=logging.INFO)
@@ -9,7 +10,6 @@ logger = logging.getLogger(__name__)
 
 # YouTube API key should be set in the environment variable YOUTUBE_API_KEY
 # API Configuration
-
 
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 api_service_name = "youtube"
@@ -24,7 +24,18 @@ youtube = googleapiclient.discovery.build(
     api_service_name, api_version, developerKey=YOUTUBE_API_KEY
 )
 
-drop_location = '/opt/airflow/local_data'
+drop_location = "/opt/airflow/local_data"
+
+
+def get_channel_name_config():
+    logger.info(f"Checking channel name in config file.")
+    config_path = os.path.join(os.path.dirname(__file__), "channel.yml")
+
+    with open(config_path, "r") as f:
+        config = yaml.safe_load(f)
+
+    return config["channel_name"]  # Get the channel name from the config file
+
 
 # Function to get channel information
 #  Process YouTube comments

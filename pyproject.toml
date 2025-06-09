@@ -1,0 +1,11 @@
+[project]
+name = "yt-channel-pipeline"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "apache-airflow==3.0.0",
+    "black>=25.1.0",
+    "google-api-python-client==2.171.0",
+]

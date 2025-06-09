@@ -1,7 +1,7 @@
 import os
 import json
 
-from src.yt_utils import logger, youtube,drop_location
+from src.yt_utils import logger, youtube, drop_location
 
 
 def main(video_ids):
