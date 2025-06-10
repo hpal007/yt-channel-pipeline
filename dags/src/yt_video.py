@@ -46,16 +46,18 @@ def main(video_ids):
             continue
 
     logger.info(f"Total videos fetched: {len(videos_data)}")
+
     channel_id = videos_data[0]["channelId"] if videos_data else "unknown"
+
     json_response = json.dumps(videos_data, indent=2)
 
-    if not os.path.exists(f"{drop_location}/video"):
+    if not os.path.exists(f"{drop_location}/{channel_id}"):
         # Create the directory if it does not exist
         logger.info(f"Creating directory {drop_location}")
-        os.mkdir(f"{drop_location}/video")
+        os.mkdir(f"{drop_location}/{channel_id}")
 
     # Write the response to a file
-    open(f"{drop_location}/video/{channel_id}.json", "w").write(str(json_response))
+    open(f"{drop_location}/{channel_id}/video_info.json", "w").write(str(json_response))
     logger.info(f"Response written to {drop_location}/{channel_id}.json")
 
 

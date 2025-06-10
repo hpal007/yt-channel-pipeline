@@ -43,6 +43,7 @@ def process_comments(response_items):
     comments = []
     for comment in response_items:
         video_id = comment["snippet"]["videoId"]
+        channel_id = comment["snippet"]["channelId"]
         author = comment["snippet"]["topLevelComment"]["snippet"]["authorDisplayName"]
         comment_text = comment["snippet"]["topLevelComment"]["snippet"]["textOriginal"]
         publish_time = comment["snippet"]["topLevelComment"]["snippet"]["publishedAt"]
@@ -50,6 +51,7 @@ def process_comments(response_items):
         replies_count = comment["snippet"].get("totalReplyCount", 0)
 
         comment_info = {
+            "channel_id": channel_id,
             "video_id": video_id,
             "author": author,
             "comment": comment_text,
