@@ -14,6 +14,7 @@ from src.yt_utils import logger, get_channel_name_config, drop_location
 
 DAG_ID = "youtube_data_pipeline"
 
+
 @dag()
 def youtube_data_pipeline():
 
@@ -102,13 +103,12 @@ def youtube_data_pipeline():
             f"Playlist Info written to {drop_location}/{channel_id}/playlist_info.json"
         )
 
-
     data_to_pass = {"channel_id": "Hello from DAG A!"}
     trigger_upload_to_azure_storage_dag = TriggerDagRunOperator(
-        task_id='trigger_upload_to_azure_storage_dag',
-        trigger_dag_id='upload_to_azure_storage_dag',  # ID of the DAG to trigger
+        task_id="trigger_upload_to_azure_storage_dag",
+        trigger_dag_id="upload_to_azure_storage_dag",  # ID of the DAG to trigger
         reset_dag_run=True,
-        conf=data_to_pass
+        conf=data_to_pass,
     )
 
     # Define the task dependencies
@@ -122,9 +122,10 @@ def youtube_data_pipeline():
     playlist_items = extract_playlist_items(channel_data)
     playlist_items >> [save_playlist_data(playlist_items)]
 
-    [extract_and_save_video_info(playlist_items),extract_and_save_comments_info(playlist_items)] >> trigger_upload_to_azure_storage_dag
-
-    
+    [
+        extract_and_save_video_info(playlist_items),
+        extract_and_save_comments_info(playlist_items),
+    ] >> trigger_upload_to_azure_storage_dag
 
 
 youtube_data_pipeline()

@@ -6,6 +6,10 @@
 
  ## [Unreleased]
 
+## [0.0.2] - 2025-06-11
+### Added
+- Integrated `black` code formatter to ensure consistent code style across the project.
+
 ## [0.0.1] - 2025-06-11
 ### Added 
  - Initializes `CHANGELOG.md` to track project changes. 

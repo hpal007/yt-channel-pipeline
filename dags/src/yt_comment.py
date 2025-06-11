@@ -7,7 +7,7 @@ from src.yt_utils import logger, process_comments, youtube, drop_location
 def main(video_ids):
     for video_id in video_ids:
         logger.info(f"Fetching comments for video ID: {video_id}")
-        
+
         get_comments_per_video(video_id)
 
 
@@ -37,7 +37,7 @@ def get_comments_per_video(video_id):
     logger.info(f"Total comments fetched: {len(comments_list)}")
 
     if response.get("items"):
-        
+
         channel_id = response["items"][0]["snippet"]["channelId"]
 
         if not os.path.exists(f"{drop_location}/{channel_id}/comments"):
