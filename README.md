@@ -58,3 +58,8 @@ The project includes the following Airflow DAGs:
 4.  **Trigger the DAGs:**
     -   In the Airflow UI, locate the `youtube_data_pipeline` and `api_data_processing` DAGs.
     -   Unpause the DAGs and trigger them to start the data extraction and processing pipeline.
+
+# Reference Links
+[YouTube Data API](https://developers.google.com/youtube/v3/docs)
+
+[API Creation and Quota & System Limit](https://console.cloud.google.com/apis/api/youtube.googleapis.com/)

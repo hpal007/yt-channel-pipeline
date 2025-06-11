@@ -1,16 +1,18 @@
 import os
 import json
 from airflow.sdk import dag, task
+from airflow.providers.standard.operators.trigger_dagrun import TriggerDagRunOperator
+
 from src.yt_search import main as search_channel
 from src.yt_channels import main as extract_channel_data
 from src.yt_playlistitems import main as extract_playlist_data
 from src.yt_video import main as extract_video_details
 from src.yt_comment import main as extract_comments
 
+
 from src.yt_utils import logger, get_channel_name_config, drop_location
 
 DAG_ID = "youtube_data_pipeline"
-
 
 @dag()
 def youtube_data_pipeline():
@@ -100,6 +102,15 @@ def youtube_data_pipeline():
             f"Playlist Info written to {drop_location}/{channel_id}/playlist_info.json"
         )
 
+
+    data_to_pass = {"channel_id": "Hello from DAG A!"}
+    trigger_upload_to_azure_storage_dag = TriggerDagRunOperator(
+        task_id='trigger_upload_to_azure_storage_dag',
+        trigger_dag_id='upload_to_azure_storage_dag',  # ID of the DAG to trigger
+        reset_dag_run=True,
+        conf=data_to_pass
+    )
+
     # Define the task dependencies
     channel_info = extract_youtube_channel(
         channel_name="{{ dag_run.conf.get('channel_name', None)}}"
@@ -111,9 +122,9 @@ def youtube_data_pipeline():
     playlist_items = extract_playlist_items(channel_data)
     playlist_items >> [save_playlist_data(playlist_items)]
 
-    extract_and_save_video_info(playlist_items)
+    [extract_and_save_video_info(playlist_items),extract_and_save_comments_info(playlist_items)] >> trigger_upload_to_azure_storage_dag
 
-    extract_and_save_comments_info(playlist_items)
+    
 
 
 youtube_data_pipeline()
