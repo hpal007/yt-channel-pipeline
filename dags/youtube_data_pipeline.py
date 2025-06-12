@@ -17,6 +17,7 @@ DAG_ID = "youtube_data_pipeline"
 
 @dag()
 def youtube_data_pipeline():
+    # This DAG orchestrates the extraction of YouTube channel data.
 
     @task()
     def extract_youtube_channel(channel_name=None):
@@ -34,6 +35,7 @@ def youtube_data_pipeline():
             )
         return channel_search_info
 
+    # Task to extract channel information using the channel ID.
     @task()
     def extract_channel_info(extract_youtube_channel: dict[str]):
         channel_data = extract_youtube_channel
@@ -44,6 +46,7 @@ def youtube_data_pipeline():
 
             return extract_channel_data(channel_id)
 
+    # Task to extract playlist items from the channel's main playlist.
     @task()
     def extract_playlist_items(extract_channel_info: dict[str]):
         playlist_data = extract_channel_info
@@ -52,6 +55,7 @@ def youtube_data_pipeline():
 
             return extract_playlist_data(playlist_id)
 
+    # Task to extract and save video details for all videos in the playlist.
     @task()
     def extract_and_save_video_info(extract_playlist_items: list):
         video_ids = [video["videoId"] for video in extract_playlist_items]
@@ -60,6 +64,7 @@ def youtube_data_pipeline():
 
         return extract_video_details(video_ids)
 
+    # Task to extract and save comments for all videos in the playlist.
     @task()
     def extract_and_save_comments_info(extract_playlist_items: list):
         video_ids = [video["videoId"] for video in extract_playlist_items]
@@ -69,6 +74,7 @@ def youtube_data_pipeline():
         logger.info(f"Extracting comments for video IDs: {video_ids}")
         extract_comments(video_ids)
 
+    # Task to save the initial channel information to a JSON file.
     @task()
     def save_channel_info(ch_info, ch_data):
         channel_id = ch_info.get("channelId")
@@ -87,6 +93,7 @@ def youtube_data_pipeline():
             f"Initial Channel Info written to {drop_location}/{channel_id}/{channel_id}.json"
         )
 
+    # Task to save the playlist data to a JSON file.
     @task()
     def save_playlist_data(data):
         channel_id = data[0].get("channel_id")
@@ -103,17 +110,19 @@ def youtube_data_pipeline():
             f"Playlist Info written to {drop_location}/{channel_id}/playlist_info.json"
         )
 
-    data_to_pass = {"channel_id": "Hello from DAG A!"}
-    trigger_upload_to_azure_storage_dag = TriggerDagRunOperator(
-        task_id="trigger_upload_to_azure_storage_dag",
-        trigger_dag_id="upload_to_azure_storage_dag",  # ID of the DAG to trigger
-        reset_dag_run=True,
-        conf=data_to_pass,
-    )
-
     # Define the task dependencies
+    # The workflow defines the sequence of data extraction and saving tasks.
+    # Used jinja here to able to get channel_name from Aiflow UI
     channel_info = extract_youtube_channel(
         channel_name="{{ dag_run.conf.get('channel_name', None)}}"
+    )
+
+    trigger_upload_to_azure_storage_dag = TriggerDagRunOperator(
+        task_id="trigger_upload_to_azure_storage_dag",
+        # Trigger the 'save_and_delete' DAG after data extraction is complete.
+        trigger_dag_id="save_and_delete",  # ID of the DAG to trigger
+        reset_dag_run=True,
+        conf=channel_info,
     )
 
     channel_data = extract_channel_info(channel_info)
@@ -129,4 +138,3 @@ def youtube_data_pipeline():
 
 
 youtube_data_pipeline()
-# This will create an instance of the DAG
