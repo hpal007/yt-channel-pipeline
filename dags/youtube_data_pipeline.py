@@ -9,8 +9,7 @@ from src.yt_playlistitems import main as extract_playlist_data
 from src.yt_video import main as extract_video_details
 from src.yt_comment import main as extract_comments
 
-
-from src.yt_utils import logger, get_channel_name_config, drop_location
+from src.yt_utils import logger, get_channel_name_config, LOCAL_DATA_DIR
 
 DAG_ID = "youtube_data_pipeline"
 
@@ -79,36 +78,16 @@ def youtube_data_pipeline():
     def save_channel_info(ch_info, ch_data):
         channel_id = ch_info.get("channelId")
         ch_data["channelTitle"] = ch_info.get("channelTitle")
+        path = f"{LOCAL_DATA_DIR}/{channel_id}"
 
-        if not os.path.exists(f"{drop_location}/{channel_id}"):
-            logger.info(f"Creating directory {drop_location}/{channel_id}")
+        if not os.path.exists(path):
+            logger.info(f"Creating directory {path}")
             # Create the channel directory if it does not exist
-            os.mkdir(f"{drop_location}/{channel_id}")
+            os.mkdir(path)
 
         json_response = json.dumps(ch_data, indent=2)
-        open(f"{drop_location}/{channel_id}/channel_{channel_id}.json", "w").write(
-            str(json_response)
-        )
-        logger.info(
-            f"Initial Channel Info written to {drop_location}/{channel_id}/{channel_id}.json"
-        )
-
-    # Task to save the playlist data to a JSON file.
-    @task()
-    def save_playlist_data(data):
-        channel_id = data[0].get("channel_id")
-        logger.info(f"Saving playist data for Channel ID: {channel_id}")
-
-        if not os.path.exists(f"{drop_location}/{channel_id}"):
-            # Create the channel directory if it does not exist
-            os.mkdir(f"{drop_location}/{channel_id}")
-        json_response = json.dumps(data, indent=2)
-        open(f"{drop_location}/{channel_id}/playlist_info.json", "w").write(
-            str(json_response)
-        )
-        logger.info(
-            f"Playlist Info written to {drop_location}/{channel_id}/playlist_info.json"
-        )
+        open(f"{path}/channel_{channel_id}.json", "w").write(str(json_response))
+        logger.info(f"Initial Channel Info written to {path}/{channel_id}.json")
 
     # Define the task dependencies
     # The workflow defines the sequence of data extraction and saving tasks.
@@ -117,10 +96,18 @@ def youtube_data_pipeline():
         channel_name="{{ dag_run.conf.get('channel_name', None)}}"
     )
 
-    trigger_upload_to_azure_storage_dag = TriggerDagRunOperator(
-        task_id="trigger_upload_to_azure_storage_dag",
+    trigger_save_to_cloud_dag = TriggerDagRunOperator(
+        task_id="trigger_save_to_cloud",
         # Trigger the 'save_and_delete' DAG after data extraction is complete.
-        trigger_dag_id="save_and_delete",  # ID of the DAG to trigger
+        trigger_dag_id="save_to_cloud",  # ID of the DAG to trigger
+        reset_dag_run=True,
+        conf=channel_info,
+    )
+
+    trigger_save_to_database_dag = TriggerDagRunOperator(
+        task_id="trigger_save_to_database_dag",
+        # Trigger the 'save_and_delete' DAG after data extraction is complete.
+        trigger_dag_id="save_to_database",  # ID of the DAG to trigger
         reset_dag_run=True,
         conf=channel_info,
     )
@@ -129,12 +116,11 @@ def youtube_data_pipeline():
     channel_data >> [save_channel_info(channel_info, channel_data)]
 
     playlist_items = extract_playlist_items(channel_data)
-    playlist_items >> [save_playlist_data(playlist_items)]
 
     [
         extract_and_save_video_info(playlist_items),
         extract_and_save_comments_info(playlist_items),
-    ] >> trigger_upload_to_azure_storage_dag
+    ] >> trigger_save_to_database_dag  # trigger_save_to_cloud
 
 
 youtube_data_pipeline()

@@ -24,7 +24,7 @@ youtube = googleapiclient.discovery.build(
     api_service_name, api_version, developerKey=YOUTUBE_API_KEY
 )
 
-drop_location = "/opt/airflow/local_data"
+LOCAL_DATA_DIR = "/opt/airflow/LOCAL_DATA"
 
 
 def get_channel_name_config():
@@ -42,6 +42,7 @@ def get_channel_name_config():
 def process_comments(response_items):
     comments = []
     for comment in response_items:
+        comment_id = comment["id"]
         video_id = comment["snippet"]["videoId"]
         channel_id = comment["snippet"]["channelId"]
         author = comment["snippet"]["topLevelComment"]["snippet"]["authorDisplayName"]
@@ -51,6 +52,7 @@ def process_comments(response_items):
         replies_count = comment["snippet"].get("totalReplyCount", 0)
 
         comment_info = {
+            "comment_id": comment_id,
             "channel_id": channel_id,
             "video_id": video_id,
             "author": author,
@@ -69,6 +71,7 @@ def process_comments(response_items):
 def process_videos(response_items):
     videos = []
     for video in response_items:
+
         channel_id = video["snippet"]["channelId"]
         video_title = video["snippet"]["title"]
         video_description = video["snippet"]["description"]

@@ -6,8 +6,15 @@
 
  ## [Unreleased]
 
-## [0.0.2] - 2025-06-11
+## [0.0.3] - 2025-06-16
+### Added 
+ - Added `save_to_database` dag to save extracted files to database in SQLite db.
+ - `db_utils` file holds all the connection and table creation details of the database. 
+ 
+### Changed 
+ - `drop_location` with `LOCAL_DATA_DIR`
 
+## [0.0.2] - 2025-06-11
 ### Added
  - Integrated `black` code formatter to ensure consistent code style across the project.
  - Added `remove_local_folder` task in `upload_to_azure_storage_dag` to remove local files. 
@@ -20,7 +27,6 @@
  -  `trigger_upload_to_azure_storage_dag` by removing hardcoded `channel_id`.
 
 ## [0.0.1] - 2025-06-11
-
 ### Added 
  - Initializes `CHANGELOG.md` to track project changes. 
  - Added `apache-airflow-providers-microsoft-azure` lib to work with azure storage.  

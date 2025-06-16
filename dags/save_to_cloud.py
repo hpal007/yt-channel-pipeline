@@ -2,7 +2,7 @@ from airflow.sdk import dag, task
 from airflow.providers.microsoft.azure.transfers.local_to_wasb import (
     LocalFilesystemToWasbOperator,
 )
-from src.yt_utils import drop_location, logger
+from src.yt_utils import LOCAL_DATA_DIR, logger
 import os
 import shutil  # Import the shutil module for directory removal
 
@@ -10,10 +10,10 @@ import shutil  # Import the shutil module for directory removal
 @dag(
     # Define the DAG ID and description
     # This DAG is triggered by the youtube_data_pipeline DAG
-    dag_id="save_and_delete",
+    dag_id="save_to_cloud",
     description="Upload files to Azure Blob Storage",
 )
-def save_and_delete():
+def save_to_cloud():
     CONTAINER = "yt-channel-data"
     WASB_CONN_ID = "azure_blob_storage_default"
 
@@ -37,7 +37,7 @@ def save_and_delete():
     @task
     def list_files(channel_id):
         file_paths = []
-        base_dir = os.path.join(drop_location, channel_id)
+        base_dir = os.path.join(LOCAL_DATA_DIR, channel_id)
         for root, _, files in os.walk(base_dir):
             for file in files:
                 full_path = os.path.join(root, file)
@@ -67,7 +67,7 @@ def save_and_delete():
         Args:
             channel_id (str): The path to the folder to remove.
         """
-        folder_path = os.path.join(drop_location, channel_id)
+        folder_path = os.path.join(LOCAL_DATA_DIR, channel_id)
         try:
             shutil.rmtree(folder_path)
             print(f"Successfully removed folder: {folder_path}")
@@ -87,4 +87,4 @@ def save_and_delete():
     upload_file >> remove_files_from_local(channel_id)
 
 
-save_and_delete()
+save_to_cloud()
